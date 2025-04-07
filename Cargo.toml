@@ -1,0 +1,7 @@
+[package]
+name = "lumen"
+description = "a federated, peer-verified content integrity platform for decentralized news dissemination"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]

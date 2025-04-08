@@ -24,22 +24,25 @@
     flake-parts.lib.mkFlake { inherit inputs; } {
       imports = [ devenv.flakeModule ];
       systems = nixpkgs.lib.systems.flakeExposed;
-      perSystem = _: {
-        devenv.shells.default = {
-          languages.rust = {
-            enable = true;
-            channel = "nightly";
-            components = [
-              "rustc"
-              "cargo"
-              "clippy"
-              "rustfmt"
-              "rust-src"
-              "rust-analyzer"
-            ];
-            mold.enable = true;
+      perSystem =
+        { pkgs, ... }:
+        {
+          devenv.shells.default = {
+            languages.rust = {
+              enable = true;
+              channel = "nightly";
+              components = [
+                "rustc"
+                "cargo"
+                "clippy"
+                "rustfmt"
+                "rust-src"
+                "rust-analyzer"
+              ];
+              mold.enable = true;
+            };
+            packages = [ pkgs.capnproto ];
           };
         };
-      };
     };
 }

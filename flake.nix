@@ -42,6 +42,7 @@
               mold.enable = true;
             };
             packages = [ pkgs.capnproto ];
+            git-hooks.hooks.rustfmt.enable = true;
           };
         };
     };

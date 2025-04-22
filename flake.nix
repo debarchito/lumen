@@ -41,6 +41,11 @@
               ];
               mold.enable = true;
             };
+            languages.javascript = {
+              enable = true;
+              package = pkgs.nodejs-slim_23;
+              pnpm.enable = true;
+            };
             packages = [ pkgs.capnproto ];
             git-hooks.hooks.rustfmt = {
               enable = true;

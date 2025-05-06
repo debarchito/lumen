@@ -46,7 +46,7 @@
               package = pkgs.nodejs-slim_23;
               pnpm.enable = true;
             };
-            packages = [ pkgs.capnproto ];
+            packages = [ pkgs.protobuf ];
             git-hooks.hooks.rustfmt = {
               enable = true;
               always_run = true;

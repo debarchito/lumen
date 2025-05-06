@@ -1,0 +1,7 @@
+// =============================================
+// Protolumen v1 (protolumen-over-gRPC) (server)
+// Licensed under ../../LICENSE-CC0
+// =============================================
+
+syntax = "proto3";
+package protolumen.v1.server;

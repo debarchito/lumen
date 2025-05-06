@@ -1,4 +1,5 @@
 .devenv*
 .direnv/
+.idea/
 target/
 .pre-commit-config.yaml

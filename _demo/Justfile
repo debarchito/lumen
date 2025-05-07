@@ -1,0 +1,11 @@
+default:
+    @just --list
+
+n1:
+    cargo run -p serverlumen --release -- start --wd=`pwd` --config=n1.serverlumen.toml
+
+n2:
+    cargo run -p serverlumen --release -- start --wd=`pwd` --config=n2.serverlumen.toml
+
+n3:
+    cargo run -p serverlumen --release -- start --wd=`pwd` --config=n3.serverlumen.toml

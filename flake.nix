@@ -46,7 +46,11 @@
               package = pkgs.nodejs-slim_23;
               pnpm.enable = true;
             };
-            packages = [ pkgs.protobuf ];
+            packages = [
+              pkgs.clorinde
+              pkgs.diesel-cli
+              pkgs.protobuf
+            ];
             git-hooks.hooks.rustfmt = {
               enable = true;
               always_run = true;

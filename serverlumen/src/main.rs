@@ -47,6 +47,7 @@ pub(crate) mod protolumen {
 use anyhow::{Context, Result};
 use clap::{Parser, Subcommand};
 use protolumen::v1::client::client_server;
+use std::env;
 use std::fs;
 use std::path::Path;
 use std::process::exit;
@@ -70,7 +71,7 @@ enum Subcommands {
         #[arg(short, long, default_value = ".")]
         wd: String,
         /// specify the path to the configuration file
-        #[arg(short, long, default_value = "protolumen.toml")]
+        #[arg(short, long, default_value = "serverlumen.toml")]
         config: String,
     },
     /// start the serverlumen server
@@ -79,7 +80,7 @@ enum Subcommands {
         #[arg(short, long, default_value = ".")]
         wd: String,
         /// specify the path to the configuration file
-        #[arg(short, long, default_value = "protolumen.toml")]
+        #[arg(short, long, default_value = "serverlumen.toml")]
         config: String,
         /// enable verbose mode for finer logging
         #[arg(short, long)]
@@ -98,7 +99,11 @@ async fn main() -> Result<()> {
         } => {
             FmtSubscriber::builder().with_max_level(Level::INFO).init();
 
-            let wd = Path::new(&wd);
+            let wd = if wd == "." || wd == "./" {
+                &env::current_dir().context("unable to get current working directory")?
+            } else {
+                Path::new(&wd)
+            };
             if !wd.exists() {
                 error!("working directory {wd:?} doesn't exist");
                 exit(1);
@@ -125,7 +130,11 @@ async fn main() -> Result<()> {
                 .with_max_level(if verbose { Level::DEBUG } else { Level::INFO })
                 .init();
 
-            let wd = Path::new(&wd);
+            let wd = if wd == "." || wd == "./" {
+                &env::current_dir().context("unable to resolve current working diretory")?
+            } else {
+                Path::new(&wd)
+            };
             if !wd.exists() {
                 error!("working directory {wd:?} doesn't exist");
                 exit(1);
@@ -137,17 +146,17 @@ async fn main() -> Result<()> {
                 exit(1);
             }
 
-            info!("using configuration file {config_path:?}");
+            let config = config::from_config(&config_path)?;
+            let name = config.name;
+            info!("[{name}] using configuration file {config_path:?}");
 
-            let config_content = config::from_config(&config_path)?;
-
-            let addr = config_content.address.parse()?;
-            info!("listening on {addr}");
+            let address = config.address.parse()?;
+            info!("[{name}] listening on {address}");
 
             let client_service = client::ClientService::default();
             Server::builder()
                 .add_service(client_server::ClientServer::new(client_service))
-                .serve(addr)
+                .serve(address)
                 .await?;
         }
     }

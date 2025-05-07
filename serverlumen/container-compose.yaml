@@ -1,0 +1,12 @@
+services:
+  devdbserverlumen:
+    image: docker.io/library/postgres:17-alpine
+    container_name: devdbserverlumen
+    ports:
+      - ${SERVERLUMEN_POSTGRES_PORT}:5432
+    environment:
+      POSTGRES_USER: ${SERVERLUMEN_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${SERVERLUMEN_POSTGRES_PASSWORD}
+      POSTGRES_DB: ${SERVERLUMEN_POSTGRES_DB}
+    volumes:
+      - ${HOME}/.var/postgresql/devdbserverlumen/data:/var/lib/postgresql/data

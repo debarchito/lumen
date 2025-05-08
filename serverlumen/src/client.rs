@@ -1,3 +1,4 @@
+use crate::SharedState;
 use crate::protolumen::v1::client::auth::{
     AuthenticateSessionRequest, AuthenticateSessionResponse, RegisterRequest, RegisterResponse,
     RevokeSessionRequest, RevokeSessionResponse, SessionChallengeRequest, SessionChallengeResponse,
@@ -6,8 +7,10 @@ use crate::protolumen::v1::client::client_server::Client;
 use anyhow::Result;
 use tonic::{Request, Response, Status};
 
-#[derive(Default)]
-pub(crate) struct ClientService {}
+#[allow(dead_code)]
+pub(crate) struct ClientService {
+    pub(crate) state: SharedState,
+}
 
 #[tonic::async_trait]
 impl Client for ClientService {

@@ -13,11 +13,11 @@ pub(crate) mod protolumen {
 
 use anyhow::{Context, Result};
 use clap::{Parser, Subcommand};
+use deadpool_postgres::{Config, Pool, Runtime};
+use deadpool_postgres::{ManagerConfig, RecyclingMethod};
 use protolumen::v1::client::client_server;
-use std::env;
-use std::fs;
-use std::path::PathBuf;
-use std::process::exit;
+use std::{env, fs, path::PathBuf, process};
+use tokio_postgres::NoTls;
 use tonic::transport::Server;
 use tracing::{Level, error, info};
 use tracing_subscriber::FmtSubscriber;
@@ -27,7 +27,7 @@ use tracing_subscriber::FmtSubscriber;
 #[command(version, about)]
 struct Arguments {
     #[command(subcommand)]
-    sub_commands: Subcommands,
+    command: Subcommands,
 }
 
 #[derive(Subcommand)]
@@ -55,11 +55,17 @@ enum Subcommands {
     },
 }
 
+#[allow(dead_code)]
+#[derive(Clone)]
+pub(crate) struct SharedState {
+    pub(crate) pool: Pool,
+}
+
 #[tokio::main]
 async fn main() -> Result<()> {
     let args = Arguments::parse();
 
-    match args.sub_commands {
+    match args.command {
         Subcommands::Init {
             wd,
             config: config_path,
@@ -69,12 +75,12 @@ async fn main() -> Result<()> {
             let config_path = working_directory(wd)?.join(&config_path);
             if config_path.exists() {
                 error!("configuration file {config_path:?} already exists");
-                exit(1);
+                process::exit(1);
             }
 
-            fs::write(&config_path, config::init()?).context(format!(
-                "failed to write serialized TOML from Config to {config_path:?}"
-            ))?;
+            fs::write(&config_path, config::init()?).with_context(|| {
+                format!("failed to write serialized TOML from Config to {config_path:?}")
+            })?;
             info!("initialized configuration file {config_path:?}");
         }
         Subcommands::Start {
@@ -90,7 +96,7 @@ async fn main() -> Result<()> {
             let config_path = working_directory(wd)?.join(&config_path);
             if !config_path.exists() {
                 error!("configuration file {config_path:?} doesn't exist");
-                exit(1);
+                process::exit(1);
             }
 
             let config = config::from_config(&config_path)?;
@@ -100,7 +106,14 @@ async fn main() -> Result<()> {
             let address = config.address.parse()?;
             info!("[{name}] listening on {address}");
 
-            let client_service = client::ClientService::default();
+            let pool = database_pool(&config.database_url)?;
+            info!("[{name}] pooling database on {}", config.database_url);
+
+            let shared_state = SharedState { pool };
+            let client_service = client::ClientService {
+                state: shared_state.clone(),
+            };
+
             Server::builder()
                 .add_service(client_server::ClientServer::new(client_service))
                 .serve(address)
@@ -112,7 +125,7 @@ async fn main() -> Result<()> {
 }
 
 fn working_directory(wd: String) -> Result<PathBuf> {
-    let wd = if wd.starts_with(".") {
+    let wd = if wd.starts_with('.') {
         env::current_dir()
             .context("unable to resolve current working directory")?
             .join(&wd)
@@ -121,8 +134,22 @@ fn working_directory(wd: String) -> Result<PathBuf> {
     };
     if !wd.exists() {
         error!("working directory {wd:?} doesn't exist");
-        exit(1);
+        process::exit(1);
     }
 
     Ok(wd)
+}
+
+fn database_pool(url: &str) -> Result<Pool> {
+    let config = Config {
+        url: Some(url.into()),
+        manager: Some(ManagerConfig {
+            recycling_method: RecyclingMethod::Fast,
+        }),
+        ..Default::default()
+    };
+
+    config
+        .create_pool(Some(Runtime::Tokio1), NoTls)
+        .context("failed to create a database pool")
 }

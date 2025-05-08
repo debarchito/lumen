@@ -8,6 +8,7 @@ use std::path::Path;
 pub(crate) struct Config {
     pub(crate) name: String,
     pub(crate) address: String,
+    pub(crate) database_url: String,
 }
 
 pub(crate) fn init() -> Result<String> {
@@ -17,6 +18,7 @@ pub(crate) fn init() -> Result<String> {
             .next()
             .context("failed to generate a random name")?,
         address: "[::1]:6543".into(),
+        database_url: "...".into(),
     })
     .context("failed to serialize Config into TOML")
 }

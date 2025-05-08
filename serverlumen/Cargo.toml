@@ -8,7 +8,7 @@ build = "build.rs"
 [dependencies]
 anyhow = "1.0.98"
 clap = { version = "4.5.37", features = ["derive"] }
-clorinde = { path = "./clorinde" }
+queries = { path = "queries/build", package = "queries" }
 names = "0.14.0"
 prost = "0.13.5"
 serde = { version = "1.0.219", features = ["derive"] }
@@ -17,6 +17,10 @@ toml = "0.8.22"
 tonic = "0.13.0"
 tracing = "0.1.41"
 tracing-subscriber = "0.3.19"
+deadpool-postgres = "0.14.1"
+tokio-postgres = "0.7.13"
 
 [build-dependencies]
+clorinde = "0.14.4"
+postgres = "0.19.10"
 tonic-build = "0.13.0"

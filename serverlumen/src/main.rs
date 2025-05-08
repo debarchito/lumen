@@ -1,36 +1,3 @@
-// use proto::calculator_server::{Calculator, CalculatorServer};
-// use tonic::transport::Server;
-// pub(crate) mod proto {
-//     tonic::include_proto!("calculator");
-// }
-
-// #[derive(Debug, Default)]
-// struct CalculatorService;
-
-// #[tonic::async_trait]
-// impl Calculator for CalculatorService {
-//     async fn add(
-//         &self,
-//         req: tonic::Request<proto::CalculationRequest>,
-//     ) -> Result<tonic::Response<proto::CalculationResponse>, tonic::Status> {
-//         let input = req.get_ref();
-//         let res = proto::CalculationResponse {
-//             result: input.a + input.b,
-//         };
-//         Ok(tonic::Response::new(res))
-//     }
-// }
-
-// #[tokio::main]
-// async fn main() -> Result<(), Box<dyn std::error::Error>> {
-//     let addr = "[::1]:6543".parse()?;
-//     let calc = CalculatorService::default();
-//     Server::builder()
-//         .add_service(CalculatorServer::new(calc))
-//         .serve(addr)
-//         .await?;
-//     Ok(())
-// }
 mod client;
 mod config;
 pub(crate) mod protolumen {
@@ -49,7 +16,7 @@ use clap::{Parser, Subcommand};
 use protolumen::v1::client::client_server;
 use std::env;
 use std::fs;
-use std::path::Path;
+use std::path::PathBuf;
 use std::process::exit;
 use tonic::transport::Server;
 use tracing::{Level, error, info};
@@ -99,17 +66,7 @@ async fn main() -> Result<()> {
         } => {
             FmtSubscriber::builder().with_max_level(Level::INFO).init();
 
-            let wd = if wd == "." || wd == "./" {
-                &env::current_dir().context("unable to get current working directory")?
-            } else {
-                Path::new(&wd)
-            };
-            if !wd.exists() {
-                error!("working directory {wd:?} doesn't exist");
-                exit(1);
-            }
-
-            let config_path = wd.join(&config_path);
+            let config_path = working_directory(wd)?.join(&config_path);
             if config_path.exists() {
                 error!("configuration file {config_path:?} already exists");
                 exit(1);
@@ -130,17 +87,7 @@ async fn main() -> Result<()> {
                 .with_max_level(if verbose { Level::DEBUG } else { Level::INFO })
                 .init();
 
-            let wd = if wd == "." || wd == "./" {
-                &env::current_dir().context("unable to resolve current working diretory")?
-            } else {
-                Path::new(&wd)
-            };
-            if !wd.exists() {
-                error!("working directory {wd:?} doesn't exist");
-                exit(1);
-            }
-
-            let config_path = wd.join(&config_path);
+            let config_path = working_directory(wd)?.join(&config_path);
             if !config_path.exists() {
                 error!("configuration file {config_path:?} doesn't exist");
                 exit(1);
@@ -162,4 +109,20 @@ async fn main() -> Result<()> {
     }
 
     Ok(())
+}
+
+fn working_directory(wd: String) -> Result<PathBuf> {
+    let wd = if wd.starts_with(".") {
+        env::current_dir()
+            .context("unable to resolve current working directory")?
+            .join(&wd)
+    } else {
+        PathBuf::from(&wd)
+    };
+    if !wd.exists() {
+        error!("working directory {wd:?} doesn't exist");
+        exit(1);
+    }
+
+    Ok(wd)
 }

@@ -1,0 +1,9 @@
+# OS specific
+.DS_Store
+.directory
+Thumbs.db
+
+# Project specific
+.direnv
+target
+result

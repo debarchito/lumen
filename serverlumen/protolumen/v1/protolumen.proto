@@ -1,0 +1,9 @@
+// ====================================
+// Protolumen v1 (protolumen-over-gRPC)
+// ====================================
+
+syntax = "proto3";
+package protolumen.v1;
+
+import "server.proto";
+import "client.proto";

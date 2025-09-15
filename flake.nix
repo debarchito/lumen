@@ -36,6 +36,7 @@
           };
           commonBuildInputs = [
             pkgs.mold
+            pkgs.protobuf
           ];
           env.RUSTFLAGS = "-Clink-args=-fuse-ld=mold";
         in

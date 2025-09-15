@@ -1,0 +1,6 @@
+// =============================================
+// Protolumen v1 (protolumen-over-gRPC) (server)
+// =============================================
+
+syntax = "proto3";
+package protolumen.v1.server;

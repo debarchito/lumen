@@ -1,0 +1,86 @@
+// =============================================
+// Protolumen v1 (protolumen-over-gRPC) (client)
+// =============================================
+
+syntax = "proto3";
+package protolumen.v1.client.auth;
+
+// ========
+// Register
+// ========
+
+message RegisterRequest {
+  string email = 1;
+  bytes primary_public_key = 2; // ED25519
+  repeated bytes additional_public_keys = 3;
+}
+
+message RegisterResponse {
+  enum Status {
+    SUCCESS = 0;
+    EMAIL_ALREADY_REGISTERED = 1;
+    INVALID_PUBLIC_KEY_FORMAT = 2;
+    SERVER_ERROR = 3;
+  }
+
+  Status status = 1;
+  string message = 2;
+  optional string user_id = 3;
+}
+
+/// ==================
+/// Session management
+/// ==================
+
+message SessionChallengeRequest {
+  string user_id = 1;
+}
+
+message SessionChallengeResponse {
+  enum Status {
+    SUCCESS = 0;
+    USER_NOT_FOUND = 1;
+    RATE_LIMITED = 2;
+    SERVER_ERROR = 3;
+  }
+
+  Status status = 1;
+  string message = 2;
+  optional string challenge_id = 3;
+  optional string challenge_string = 4;
+  optional int32 expires_in_seconds = 5;
+}
+
+message AuthenticateSessionRequest {
+  string challenge_id = 1;
+  bytes proposed_signature = 2;
+  int32 public_key_used = 3;
+}
+
+message AuthenticateSessionResponse {
+  enum Status {
+    SUCCESS = 0;
+    INVALID_SIGNATURE = 1;
+    EXPIRED_CHALLENGE = 2;
+    USER_NOT_FOUND = 3;
+    SERVER_ERROR = 4;
+  }
+  Status status = 1;
+  string message = 2;
+  optional string session_token = 3;
+  optional int32 expires_in_seconds = 4;
+}
+
+message RevokeSessionRequest {
+  string session_token = 1;
+}
+
+message RevokeSessionResponse {
+  enum Status {
+    SUCCESS = 0;
+    SESSION_NOT_FOUND = 1;
+    SERVER_ERROR = 2;
+  }
+  Status status = 1;
+  string message = 2;
+}

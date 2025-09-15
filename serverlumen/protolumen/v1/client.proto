@@ -1,0 +1,18 @@
+// =============================================
+// Protolumen v1 (protolumen-over-gRPC) (client)
+// =============================================
+
+syntax = "proto3";
+package protolumen.v1.client;
+
+import "client/auth.proto";
+
+service Client {
+  /* Register a user */
+  rpc Register(auth.RegisterRequest) returns (auth.RegisterResponse);
+
+  /* User session management */
+  rpc SessionChallenge(auth.SessionChallengeRequest) returns (auth.SessionChallengeResponse);
+  rpc AuthenticateSession(auth.AuthenticateSessionRequest) returns (auth.AuthenticateSessionResponse);
+  rpc RevokeSession(auth.RevokeSessionRequest) returns (auth.RevokeSessionResponse);
+}

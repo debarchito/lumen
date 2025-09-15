@@ -4,3 +4,9 @@
 
 syntax = "proto3";
 package protolumen.v1.client;
+
+import "client/conn.proto";
+
+service Client {
+    rpc Send(conn.SendRequest) returns (conn.SendResponse);
+}

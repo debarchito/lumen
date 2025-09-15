@@ -6,6 +6,12 @@ pub(crate) mod protolumen {
       }
       tonic::include_proto!("protolumen.v1.server");
     }
+    pub(crate) mod client {
+      pub(crate) mod conn {
+        tonic::include_proto!("protolumen.v1.client.conn");
+      }
+      tonic::include_proto!("protolumen.v1.client");
+    }
     pub(crate) const FILE_DESCRIPTOR_SET: &[u8] =
       tonic::include_file_descriptor_set!("protolumen_v1_file_descriptor_set");
   }
@@ -14,6 +20,7 @@ mod config;
 mod service;
 use anyhow::{Context, Result};
 use clap::{Parser, Subcommand};
+use protolumen::v1::client::client_server as client_client_server;
 use protolumen::v1::server::federation_server as server_federation_server;
 use std::{env, fs, path::PathBuf, process};
 use tonic::transport::Server;
@@ -51,6 +58,13 @@ enum Subcommands {
     #[arg(short, long)]
     verbose: bool,
   },
+}
+
+/// Shared state to use across services.
+#[allow(dead_code)]
+#[derive(Clone)]
+pub(crate) struct SharedState {
+  pub(crate) config: config::Config,
 }
 
 #[tokio::main]
@@ -92,14 +106,23 @@ async fn main() -> Result<()> {
       }
 
       let config = config::from_config(&config_path)?;
-      let name = config.node.name;
+      let name = &config.node.name;
       info!("[{name}] using configuration file {config_path:?}");
 
       let address = config.node.address.parse()?;
 
       info!("[{name}] listening on {address}");
 
-      let server_federation_service = service::ServerFederationService;
+      let server_federation_service = service::server::ServerFederationService {
+        state: SharedState {
+          config: config.clone(),
+        },
+      };
+      let client_service = service::client::ClientService {
+        state: SharedState {
+          config: config.clone(),
+        },
+      };
       let reflection = tonic_reflection::server::Builder::configure()
         .register_encoded_file_descriptor_set(protolumen::v1::FILE_DESCRIPTOR_SET)
         .build_v1()?;
@@ -108,6 +131,7 @@ async fn main() -> Result<()> {
         .add_service(server_federation_server::FederationServer::new(
           server_federation_service,
         ))
+        .add_service(client_client_server::ClientServer::new(client_service))
         .serve(address)
         .await?;
     }

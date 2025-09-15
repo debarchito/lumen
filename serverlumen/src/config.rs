@@ -6,14 +6,14 @@ use std::path::Path;
 use uuid::Uuid;
 
 /// The full configuration.
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub(crate) struct Config {
   pub(crate) node: Node,
   pub(crate) trust_list: Vec<TrustList>,
 }
 
 /// Configure the node.
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub(crate) struct Node {
   pub(crate) name: String,
   pub(crate) id: String,
@@ -21,7 +21,7 @@ pub(crate) struct Node {
 }
 
 /// Configure the trust list for the node.
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub(crate) struct TrustList {
   pub(crate) id: String,
   pub(crate) address: String,

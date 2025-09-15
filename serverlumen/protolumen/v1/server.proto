@@ -4,3 +4,9 @@
 
 syntax = "proto3";
 package protolumen.v1.server;
+
+import "server/conn.proto";
+
+service Federation {
+  rpc Receive(conn.ReceiveRequest) returns (conn.ReceiveResponse);
+}

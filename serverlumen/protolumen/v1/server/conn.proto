@@ -1,0 +1,31 @@
+// =============================================
+// Protolumen v1 (protolumen-over-gRPC) (server)
+// =============================================
+
+syntax = "proto3";
+package protolumen.v1.server.conn;
+
+import "google/protobuf/timestamp.proto";
+
+message ReceiveRequest {
+  string version = 1;
+  string origin_id = 2;
+  string destination_id = 3;
+  string payload_id = 4;
+  bytes payload = 5;
+  google.protobuf.Timestamp timestamp = 6;
+}
+
+message ReceiveResponse {
+  string version = 1;
+  string payload_id = 2;
+  ReceiveStatus status = 3;
+  string details = 4;
+  google.protobuf.Timestamp timestamp = 5;
+}
+
+enum ReceiveStatus {
+  UNSPECIFIED = 0;
+  OK = 1;
+  ERROR = 2;
+}

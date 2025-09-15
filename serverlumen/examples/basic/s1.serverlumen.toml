@@ -1,0 +1,9 @@
+trust_list = [
+  { id = "64946102-da7b-8ec6-95a7-b586ddfaaa16", address = "[::1]:6544" },
+  { id = "2997cba6-a4ff-8cb6-8170-dbd9211c0db3", address = "[::1]:6545" }
+]
+
+[node]
+name = "melodic-beast"
+id = "f2d24bc6-ccbb-82fe-b945-b7d2c33e8643"
+address = "[::1]:6543"

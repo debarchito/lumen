@@ -1,0 +1,8 @@
+s1:
+    @../../../target/release/serverlumen start --config=s1.serverlumen.toml
+
+s2:
+    @../../../target/release/serverlumen start --config=s2.serverlumen.toml
+
+s3:
+    @../../../target/release/serverlumen start --config=s3.serverlumen.toml

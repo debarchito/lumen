@@ -54,6 +54,7 @@
             name = "lumen";
             nativeBuildInputs = [
               rust-toolchain
+              pkgs.just
             ]
             ++ commonBuildInputs;
             inherit (env) RUSTFLAGS;

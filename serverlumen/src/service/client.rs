@@ -32,7 +32,7 @@ impl Client for ClientService {
       })?;
       let msg = crate::protolumen::v1::server::conn::ReceiveRequest {
         version: "1".to_string(),
-        origin_id: input.origin_id.clone(),
+        origin_id: self.state.config.node.id.clone(),
         destination_id: input.destination_id.clone(),
         payload_id: Uuid::new_v8(rand::random()).to_string(),
         payload: input.payload.clone(),
